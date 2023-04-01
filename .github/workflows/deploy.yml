@@ -1,0 +1,55 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: "Select environment"
+        required: true
+        default: "prod"
+        type: choice
+        options:
+          - prod
+          - test
+
+run-name: "Deploy to '${{ github.ref == 'refs/heads/main' && inputs.stage || 'prod' }}' with message '${{ github.event.head_commit.message }}'"
+
+env:
+  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  NODE_OPTIONS: "--max_old_space_size=4096"
+  DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN }}
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    name: Deploy UI
+
+    steps:
+      - name: Checkout code 📁
+        uses: actions/checkout@v3
+
+      - name: Add npm credentials 🔒
+        run: echo "//npm.pkg.github.com/:_authToken=$NODE_AUTH_TOKEN" > ~/.npmrc
+
+      - name: Install Deno ⬇️
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Install deployctl ⬇️
+        run: deno install -A -r -f https://deno.land/x/deploy/deployctl.ts
+
+      - name: Install dependencies ⬇️
+        run: npm ci
+
+      - name: Build ⚒️
+        run: npm run build
+
+      - name: Preview 👀
+        run: npm run preview & sleep 1 && kill $!
+
+      - name: Deploy 🚀
+        run: npm run deploy:${{ github.ref == 'refs/heads/main' && inputs.stage || 'prod' }}
