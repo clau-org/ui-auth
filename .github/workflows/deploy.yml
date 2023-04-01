@@ -26,6 +26,7 @@ jobs:
   build-deploy:
     runs-on: ubuntu-latest
     name: Deploy UI
+    if: "!contains(github.event.head_commit.message, '[skip]')"
 
     steps:
       - name: Checkout code 📁
@@ -43,7 +44,7 @@ jobs:
         run: deno install -A -r -f https://deno.land/x/deploy/deployctl.ts
 
       - name: Install dependencies ⬇️
-        run: npm ci
+        run: npm i
 
       - name: Build ⚒️
         run: npm run build
