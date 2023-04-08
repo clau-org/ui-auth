@@ -29,7 +29,9 @@
     "vitest": "^0.29.7"
   },
   "dependencies": {
+    "@magic-ext/oauth": "^10.0.1",
     "@sidebase/nuxt-pdf": "^0.1.1",
+    "magic-sdk": "^16.0.1",
     "vue3-json-source-viewer": "^2.4.2"
   },
   "publishConfig": {
